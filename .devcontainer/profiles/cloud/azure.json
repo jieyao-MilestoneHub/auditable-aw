@@ -1,0 +1,27 @@
+{
+  "$schema": "../../schemas/security-profile.schema.json",
+  "name": "azure",
+  "description": "Azure environment",
+
+  "permissions": {
+    "deny": [
+      "Read(./**/.azure/**)",
+      "Read(./**/azure.json)",
+      "Read(./**/servicePrincipal.json)",
+      "Bash(az account set:*)",
+      "Bash(az keyvault secret show:*)",
+      "Bash(az ad:*)",
+      "Bash(az role assignment:*)",
+      "Bash(az group delete:*)",
+      "Bash(az vm delete:*)",
+      "Bash(az sql server delete:*)"
+    ],
+    "ask": [
+      "Bash(az storage:*)",
+      "Bash(az webapp:*)",
+      "Bash(az functionapp:*)",
+      "Bash(az acr:*)",
+      "Bash(func:*)"
+    ]
+  }
+}

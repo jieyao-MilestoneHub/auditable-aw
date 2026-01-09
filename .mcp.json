@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "aawctl": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["./.aaw/tools/aawctl/server/dist/index.js"],
+      "env": {
+        "AAW_LOG_DIR": "./.aaw/logs",
+        "AAW_POLICY_DIR": "./.aaw",
+        "AAW_EVIDENCE_DIR": "./.aaw/evidence",
+        "NODE_ENV": "development"
+      }
+    }
+  }
+}

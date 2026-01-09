@@ -1,0 +1,13 @@
+{
+  "$schema": "../../../schemas/security-profile.schema.json",
+  "name": "fastapi",
+  "extends": "languages/python",
+  "description": "FastAPI projects",
+
+  "permissions": {
+    "ask": [
+      "Bash(uvicorn:*)",
+      "Bash(gunicorn:*)"
+    ]
+  }
+}

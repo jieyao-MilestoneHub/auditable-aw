@@ -1,0 +1,39 @@
+{
+  "$schema": "../../schemas/security-profile.schema.json",
+  "name": "dotnet",
+  "extends": "base/security-core",
+  "description": ".NET projects",
+
+  "permissions": {
+    "deny": [
+      "Read(./**/nuget.config)",
+      "Read(./**/appsettings.*.json)",
+      "Read(./**/user-secrets/**)",
+      "Read(./**/*.snk)",
+      "Bash(dotnet nuget push:*)",
+      "Bash(dotnet user-secrets:*)",
+      "Bash(dotnet dev-certs:*)"
+    ],
+    "ask": [
+      "Bash(dotnet build:*)",
+      "Bash(dotnet test:*)",
+      "Bash(dotnet run:*)",
+      "Bash(dotnet add:*)",
+      "Bash(dotnet restore:*)",
+      "Bash(dotnet publish:*)"
+    ]
+  },
+
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{
+          "type": "command",
+          "command": "if [[ \"$CLAUDE_TOOL_INPUT_FILE_PATH\" =~ \\.cs$ ]] && command -v dotnet &>/dev/null; then dotnet format --include \"$CLAUDE_TOOL_INPUT_FILE_PATH\" 2>/dev/null || true; fi",
+          "timeout": 30
+        }]
+      }
+    ]
+  }
+}

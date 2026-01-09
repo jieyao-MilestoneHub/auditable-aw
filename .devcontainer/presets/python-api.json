@@ -1,0 +1,10 @@
+{
+  "name": "python-api",
+  "description": "Python API (FastAPI + GCP)",
+  "profiles": [
+    "base/security-core",
+    "languages/python",
+    "frameworks/python/fastapi",
+    "cloud/gcp"
+  ]
+}

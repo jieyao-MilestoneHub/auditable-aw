@@ -1,0 +1,6 @@
+{
+  "$schema": "../../../schemas/security-profile.schema.json",
+  "name": "echo",
+  "extends": "languages/go",
+  "description": "Echo framework projects"
+}

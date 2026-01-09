@@ -1,0 +1,122 @@
+name: PR - AAW Security Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]
+
+concurrency:
+  group: ${{ github.workflow }}-pr-${{ github.event.pull_request.number || github.event.issue.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: read
+
+jobs:
+  review:
+    # Run on PR events, or on issue comments that mention @claude
+    if: |
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'issue_comment' &&
+       github.event.issue.pull_request &&
+       contains(github.event.comment.body, '@claude'))
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository (PR event)
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+
+      - name: Checkout repository (issue_comment event)
+        if: github.event_name == 'issue_comment'
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Checkout PR branch (issue_comment event)
+        if: github.event_name == 'issue_comment'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr checkout ${{ github.event.issue.number }}
+
+      - name: Get PR base branch
+        id: pr-info
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "base_ref=${{ github.event.pull_request.base.ref }}" >> $GITHUB_OUTPUT
+          else
+            BASE_REF=$(gh pr view ${{ github.event.issue.number }} --json baseRefName -q '.baseRefName')
+            echo "base_ref=$BASE_REF" >> $GITHUB_OUTPUT
+          fi
+
+      - name: AAW Security Review
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-opus-4-5-20251101
+          timeout_minutes: 30
+          track_progress: true
+          prompt: |
+            # AAW Security Review
+
+            You are performing an auditable security review of this Pull Request.
+
+            ## Review Standards
+
+            1. Read `.claude/agents/security-reviewer.md` for the full security checklist
+            2. Read `.claude/skills/aaw-security/SKILL.md` for security rules
+
+            ## Steps
+
+            1. **Get Changes**: Run `git diff origin/${{ steps.pr-info.outputs.base_ref }}...HEAD` to see all changes
+
+            2. **Security Audit** (Priority):
+               - Check for hardcoded secrets, API keys, tokens
+               - Verify no .env files or credentials are committed
+               - Check for SQL injection, XSS, command injection risks
+               - Validate input sanitization
+               - Check authentication/authorization patterns
+
+            3. **Policy Compliance**:
+               - Read `aaw.policy.yaml` for allowed/denied patterns
+               - Verify changes don't violate policy rules
+               - Check if any restricted commands are being used
+
+            4. **Code Quality**:
+               - TypeScript strict mode compliance
+               - Proper error handling (no silent failures)
+               - Loading/error/empty states handled
+
+            5. **Provide Feedback**:
+               Organize by severity:
+               - **CRITICAL**: Security vulnerabilities, policy violations
+               - **WARNING**: Best practice violations, potential issues
+               - **SUGGESTION**: Improvements, optimizations
+
+            ## Output Format
+
+            ```markdown
+            ## AAW Security Review
+
+            ### Summary
+            [Brief overview of changes]
+
+            ### Security Findings
+            [List any security issues found]
+
+            ### Policy Compliance
+            [Policy check results]
+
+            ### Recommendations
+            [Organized by severity]
+            ```
+          claude_args: |
+            --max-turns 15
+            --allowedTools "Read,Glob,Grep,Bash(git:*),Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*)"

@@ -1,0 +1,26 @@
+{
+  "$schema": "../../schemas/security-profile.schema.json",
+  "name": "gcp",
+  "description": "GCP environment",
+
+  "permissions": {
+    "deny": [
+      "Read(./**/.gcp/**)",
+      "Read(./**/service-account*.json)",
+      "Read(./**/*-sa.json)",
+      "Bash(gcloud auth:*)",
+      "Bash(gcloud iam:*)",
+      "Bash(gcloud secrets versions access:*)",
+      "Bash(gcloud projects delete:*)",
+      "Bash(gcloud compute instances delete:*)",
+      "Bash(gcloud sql instances delete:*)"
+    ],
+    "ask": [
+      "Bash(gcloud storage:*)",
+      "Bash(gcloud run:*)",
+      "Bash(gcloud functions:*)",
+      "Bash(gcloud builds:*)",
+      "Bash(firebase:*)"
+    ]
+  }
+}

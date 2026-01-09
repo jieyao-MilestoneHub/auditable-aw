@@ -1,0 +1,80 @@
+{
+  "$schema": "../schema/project.schema.json",
+  "name": "nextjs-fullstack",
+  "description": "Next.js App Router (uses create-next-app)",
+
+  "init": {
+    "baseDir": "workspace",
+    "steps": [
+      {
+        "name": "Create Next.js app in workspace",
+        "command": "npx create-next-app@latest workspace --typescript --tailwind --eslint --app --src-dir --import-alias '@/*' --no-git",
+        "creates": "workspace/src/app"
+      },
+      {
+        "name": "Create additional directories",
+        "command": "mkdir -p workspace/src/lib/db workspace/src/lib/services workspace/src/types/api",
+        "creates": "workspace/src/lib"
+      }
+    ]
+  },
+
+  "roles": {
+    "frontend": {
+      "name": "Frontend Developer",
+      "path": "workspace/src/app",
+      "framework": "nextjs",
+      "canRead": ["workspace/src/components/**", "workspace/src/lib/**", "workspace/src/types/**"],
+      "canWrite": ["workspace/src/app/**", "workspace/src/components/**", "workspace/src/styles/**"],
+      "forbidden": ["workspace/src/lib/db/**", "workspace/src/lib/services/**", "workspace/prisma/**"],
+      "commands": {
+        "dev": "cd workspace && npm run dev",
+        "build": "cd workspace && npm run build",
+        "test": "cd workspace && npm run test"
+      }
+    },
+    "backend": {
+      "name": "Backend Developer",
+      "path": "workspace/src/lib",
+      "framework": "nextjs",
+      "canRead": ["workspace/src/types/**", "workspace/prisma/**"],
+      "canWrite": ["workspace/src/lib/**", "workspace/src/app/api/**", "workspace/prisma/**"],
+      "forbidden": ["workspace/src/components/**", "workspace/src/app/(routes)/**"],
+      "commands": {
+        "dev": "cd workspace && npm run dev",
+        "test": "cd workspace && npm run test:api",
+        "db:push": "cd workspace && npx prisma db push",
+        "db:generate": "cd workspace && npx prisma generate"
+      }
+    },
+    "integrator": {
+      "name": "API Integrator",
+      "path": "workspace/src/types",
+      "canRead": ["workspace/src/app/api/**", "workspace/src/lib/**", "workspace/src/components/**"],
+      "canWrite": ["workspace/src/types/**", "workspace/src/lib/validators/**"],
+      "forbidden": ["workspace/src/components/**", "workspace/src/lib/services/**"],
+      "commands": {
+        "generate": "cd workspace && npx prisma generate",
+        "test": "cd workspace && npm run test:integration"
+      }
+    }
+  },
+
+  "shared": {
+    "contracts": "workspace/src/types/api",
+    "types": "workspace/src/types",
+    "schemas": "workspace/src/lib/validators"
+  },
+
+  "docs": {
+    "nextjs": "https://nextjs.org/docs",
+    "app-router": "https://nextjs.org/docs/app",
+    "api-routes": "https://nextjs.org/docs/app/building-your-application/routing/route-handlers"
+  },
+
+  "collaboration": {
+    "mode": "flexible",
+    "lockTimeout": 300,
+    "requireAck": false
+  }
+}

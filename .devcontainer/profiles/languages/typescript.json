@@ -1,0 +1,39 @@
+{
+  "$schema": "../../schemas/security-profile.schema.json",
+  "name": "typescript",
+  "extends": "base/security-core",
+  "description": "TypeScript/JavaScript projects",
+
+  "permissions": {
+    "deny": [
+      "Read(./**/node_modules/**/.env*)",
+      "Read(./**/.npmrc)",
+      "Read(./**/.yarnrc)",
+      "Bash(npm config set:*)",
+      "Bash(npm adduser:*)",
+      "Bash(npm publish:*)",
+      "Bash(npx -y:*)",
+      "Bash(yarn config set:*)"
+    ],
+    "ask": [
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(yarn:*)",
+      "Bash(pnpm:*)",
+      "Bash(npx:*)"
+    ]
+  },
+
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{
+          "type": "command",
+          "command": "if [[ \"$CLAUDE_TOOL_INPUT_FILE_PATH\" =~ \\.(ts|tsx|js|jsx)$ ]]; then npx prettier --write \"$CLAUDE_TOOL_INPUT_FILE_PATH\" 2>/dev/null && npx eslint --fix \"$CLAUDE_TOOL_INPUT_FILE_PATH\" 2>/dev/null || true; fi",
+          "timeout": 30
+        }]
+      }
+    ]
+  }
+}

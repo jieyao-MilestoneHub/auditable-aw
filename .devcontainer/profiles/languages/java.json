@@ -1,0 +1,39 @@
+{
+  "$schema": "../../schemas/security-profile.schema.json",
+  "name": "java",
+  "extends": "base/security-core",
+  "description": "Java/Kotlin projects",
+
+  "permissions": {
+    "deny": [
+      "Read(./**/settings.xml)",
+      "Read(./**/.m2/settings.xml)",
+      "Read(./**/.gradle/gradle.properties)",
+      "Read(./**/keystore*)",
+      "Read(./**/truststore*)",
+      "Bash(mvn deploy:*)",
+      "Bash(gradle publish:*)",
+      "Bash(java -jar:*)",
+      "Bash(java -cp:*)"
+    ],
+    "ask": [
+      "Bash(mvn:*)",
+      "Bash(gradle:*)",
+      "Bash(./gradlew:*)",
+      "Bash(./mvnw:*)"
+    ]
+  },
+
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{
+          "type": "command",
+          "command": "if [[ \"$CLAUDE_TOOL_INPUT_FILE_PATH\" =~ \\.(java|kt)$ ]] && command -v google-java-format &>/dev/null; then google-java-format --replace \"$CLAUDE_TOOL_INPUT_FILE_PATH\" 2>/dev/null || true; fi",
+          "timeout": 30
+        }]
+      }
+    ]
+  }
+}

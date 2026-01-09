@@ -1,0 +1,6 @@
+{
+  "$schema": "../../../schemas/security-profile.schema.json",
+  "name": "fiber",
+  "extends": "languages/go",
+  "description": "Fiber framework projects"
+}

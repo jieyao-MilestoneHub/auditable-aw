@@ -1,0 +1,13 @@
+{
+  "$schema": "../../../schemas/security-profile.schema.json",
+  "name": "aspnet-core",
+  "extends": "languages/dotnet",
+  "description": "ASP.NET Core projects",
+
+  "permissions": {
+    "deny": [
+      "Read(./**/appsettings.Production.json)",
+      "Bash(dotnet ef database drop:*)"
+    ]
+  }
+}

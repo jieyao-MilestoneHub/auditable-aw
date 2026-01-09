@@ -1,0 +1,18 @@
+{
+  "$schema": "../../../schemas/security-profile.schema.json",
+  "name": "spring-boot",
+  "extends": "languages/java",
+  "description": "Spring Boot projects",
+
+  "permissions": {
+    "deny": [
+      "Read(./**/application-prod*.yml)",
+      "Read(./**/application-prod*.properties)",
+      "Read(./**/bootstrap*.yml)"
+    ],
+    "ask": [
+      "Bash(./mvnw spring-boot:run:*)",
+      "Bash(./gradlew bootRun:*)"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "go-microservices",
+  "description": "Go microservices (Gin + AWS)",
+  "profiles": [
+    "base/security-core",
+    "languages/go",
+    "frameworks/go/gin",
+    "cloud/aws"
+  ]
+}

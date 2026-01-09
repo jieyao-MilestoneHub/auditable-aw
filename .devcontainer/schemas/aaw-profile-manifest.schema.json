@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aaw.dev/schemas/aaw-profile-manifest.schema.json",
+  "title": "AAW Profile Manifest",
+  "description": "Project profile configuration",
+  "type": "object",
+
+  "properties": {
+    "$schema": { "type": "string" },
+    "profiles": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "Profile paths to load and merge"
+    },
+    "preset": {
+      "type": "string",
+      "description": "Use preset instead of profiles"
+    },
+    "cloud": {
+      "enum": ["aws", "azure", "gcp"],
+      "description": "Cloud environment profile"
+    },
+    "overrides": {
+      "$ref": "#/$defs/profileOverrides",
+      "description": "Project-specific overrides"
+    }
+  },
+
+  "oneOf": [
+    { "required": ["profiles"] },
+    { "required": ["preset"] }
+  ],
+
+  "$defs": {
+    "profileOverrides": {
+      "type": "object",
+      "properties": {
+        "permissions": {
+          "type": "object",
+          "properties": {
+            "deny": { "type": "array", "items": { "type": "string" } },
+            "ask": { "type": "array", "items": { "type": "string" } },
+            "allow": { "type": "array", "items": { "type": "string" } }
+          }
+        },
+        "hooks": {
+          "type": "object",
+          "properties": {
+            "PreToolUse": { "$ref": "#/$defs/hookArray" },
+            "PostToolUse": { "$ref": "#/$defs/hookArray" },
+            "Stop": { "$ref": "#/$defs/hookArray" }
+          }
+        },
+        "allowManagedHooksOnly": { "type": "boolean" },
+        "strictKnownMarketplaces": { "type": "boolean" },
+        "allowedMcpServers": { "type": "array", "items": { "$ref": "#/$defs/mcpServerRef" } },
+        "deniedMcpServers": { "type": "array", "items": { "$ref": "#/$defs/mcpServerRef" } },
+        "sandbox": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "allowUnsandboxedCommands": { "type": "boolean" },
+            "autoAllowBashIfSandboxed": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "hookArray": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "matcher": { "type": "string" },
+          "hooks": { "$ref": "#/$defs/hookCommands" }
+        },
+        "required": ["hooks"]
+      }
+    },
+    "hookCommands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": { "enum": ["command"] },
+          "command": { "type": "string" },
+          "timeout": { "type": "number" }
+        },
+        "required": ["type", "command"]
+      }
+    },
+    "mcpServerRef": {
+      "type": "object",
+      "properties": {
+        "serverName": { "type": "string" },
+        "serverUrl": { "type": "string" }
+      }
+    }
+  }
+}

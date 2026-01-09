@@ -1,0 +1,13 @@
+{
+  "$schema": "../../../schemas/security-profile.schema.json",
+  "name": "nestjs",
+  "extends": "languages/typescript",
+  "description": "NestJS projects",
+
+  "permissions": {
+    "ask": [
+      "Bash(nest generate:*)",
+      "Bash(nest build:*)"
+    ]
+  }
+}

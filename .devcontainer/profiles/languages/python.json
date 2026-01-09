@@ -1,0 +1,41 @@
+{
+  "$schema": "../../schemas/security-profile.schema.json",
+  "name": "python",
+  "extends": "base/security-core",
+  "description": "Python projects",
+
+  "permissions": {
+    "deny": [
+      "Read(./**/.pypirc)",
+      "Read(./**/pip.conf)",
+      "Read(./**/.netrc)",
+      "Bash(pip config:*)",
+      "Bash(pip install --trusted-host:*)",
+      "Bash(python -c:*)",
+      "Bash(python3 -c:*)"
+    ],
+    "ask": [
+      "Bash(pip install:*)",
+      "Bash(pip3 install:*)",
+      "Bash(poetry:*)",
+      "Bash(pdm:*)",
+      "Bash(uv:*)",
+      "Bash(pytest:*)",
+      "Bash(python -m:*)",
+      "Bash(python3 -m:*)"
+    ]
+  },
+
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{
+          "type": "command",
+          "command": "if [[ \"$CLAUDE_TOOL_INPUT_FILE_PATH\" =~ \\.py$ ]]; then black --quiet \"$CLAUDE_TOOL_INPUT_FILE_PATH\" 2>/dev/null && ruff check --fix \"$CLAUDE_TOOL_INPUT_FILE_PATH\" 2>/dev/null || true; fi",
+          "timeout": 30
+        }]
+      }
+    ]
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "$schema": "../../schemas/security-profile.schema.json",
+  "name": "go",
+  "extends": "base/security-core",
+  "description": "Go projects",
+
+  "permissions": {
+    "deny": [
+      "Read(./**/GOPRIVATE*)",
+      "Read(./**/.netrc)",
+      "Bash(go run:*)",
+      "Bash(go get -insecure:*)",
+      "Bash(go mod download -insecure:*)",
+      "Bash(CGO_ENABLED=1:*)"
+    ],
+    "ask": [
+      "Bash(go build:*)",
+      "Bash(go test:*)",
+      "Bash(go mod:*)",
+      "Bash(go get:*)",
+      "Bash(go generate:*)",
+      "Bash(golangci-lint:*)"
+    ]
+  },
+
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{
+          "type": "command",
+          "command": "if [[ \"$CLAUDE_TOOL_INPUT_FILE_PATH\" =~ \\.go$ ]]; then gofmt -w \"$CLAUDE_TOOL_INPUT_FILE_PATH\" 2>/dev/null && golangci-lint run --fix \"$CLAUDE_TOOL_INPUT_FILE_PATH\" 2>/dev/null || true; fi",
+          "timeout": 30
+        }]
+      }
+    ]
+  }
+}

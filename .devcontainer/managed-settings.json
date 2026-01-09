@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "disableBypassPermissionsMode": "disable",
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+      "Read(./**/credentials*)",
+      "Read(./**/*.pem)",
+      "Read(./**/*.key)",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(rm -rf /)",
+      "Bash(sudo:*)"
+    ]
+  },
+  "allowManagedHooksOnly": true,
+  "allowedMcpServers": [
+    { "serverName": "aawctl" },
+    { "serverName": "github" }
+  ],
+  "deniedMcpServers": [
+    { "serverUrl": "https://*.untrusted.com/*" }
+  ]
+}

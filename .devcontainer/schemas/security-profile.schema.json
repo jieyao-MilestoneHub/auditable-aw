@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aaw.dev/schemas/security-profile.schema.json",
+  "title": "AAW Security Profile",
+  "description": "Enterprise Claude Code governance profile",
+  "type": "object",
+
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$" },
+    "name": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "extends": { "type": "string" },
+    "description": { "type": "string" },
+
+    "permissions": {
+      "type": "object",
+      "properties": {
+        "disableBypassPermissionsMode": { "enum": ["disable", "warn"] },
+        "deny": { "type": "array", "items": { "type": "string" } },
+        "ask": { "type": "array", "items": { "type": "string" } },
+        "allow": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "hooks": {
+      "type": "object",
+      "properties": {
+        "PreToolUse": { "$ref": "#/$defs/hookArray" },
+        "PostToolUse": { "$ref": "#/$defs/hookArray" },
+        "Stop": { "$ref": "#/$defs/hookArray" }
+      }
+    },
+
+    "allowManagedHooksOnly": { "type": "boolean" },
+    "strictKnownMarketplaces": { "type": "boolean" },
+    "allowedMcpServers": { "type": "array", "items": { "$ref": "#/$defs/mcpServerRef" } },
+    "deniedMcpServers": { "type": "array", "items": { "$ref": "#/$defs/mcpServerRef" } },
+
+    "sandbox": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "allowUnsandboxedCommands": { "type": "boolean" },
+        "autoAllowBashIfSandboxed": { "type": "boolean" }
+      }
+    }
+  },
+
+  "required": ["name"],
+
+  "$defs": {
+    "hookArray": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "matcher": { "type": "string", "description": "Tool name pattern (e.g., Edit|Write)" },
+          "hooks": { "$ref": "#/$defs/hookCommands" }
+        },
+        "required": ["hooks"]
+      }
+    },
+    "hookCommands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": { "enum": ["command"], "description": "Hook type" },
+          "command": { "type": "string", "description": "Shell command to execute" },
+          "timeout": { "type": "number", "description": "Timeout in seconds" }
+        },
+        "required": ["type", "command"]
+      }
+    },
+    "mcpServerRef": {
+      "type": "object",
+      "properties": {
+        "serverName": { "type": "string" },
+        "serverUrl": { "type": "string" }
+      }
+    }
+  }
+}

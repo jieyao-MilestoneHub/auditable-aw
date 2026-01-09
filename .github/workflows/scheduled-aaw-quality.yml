@@ -1,0 +1,155 @@
+name: Scheduled - AAW Code Quality Review
+
+on:
+  schedule:
+    # Run every Sunday at 8 AM UTC
+    - cron: '0 8 * * 0'
+  workflow_dispatch:
+    inputs:
+      scope:
+        description: 'Package scope to review (frontend, backend, shared, or all)'
+        required: false
+        default: 'all'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.run_id }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  select-scope:
+    runs-on: ubuntu-latest
+    outputs:
+      scopes: ${{ steps.select.outputs.scopes }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Select scopes to review
+        id: select
+        run: |
+          INPUT_SCOPE="${{ github.event.inputs.scope || 'all' }}"
+
+          if [ "$INPUT_SCOPE" == "all" ]; then
+            # Select all packages that have source files
+            SCOPES='["frontend","backend","shared"]'
+          else
+            SCOPES="[\"$INPUT_SCOPE\"]"
+          fi
+
+          echo "scopes=$SCOPES" >> $GITHUB_OUTPUT
+          echo "Selected scopes: $SCOPES"
+
+  review-scope:
+    needs: select-scope
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        scope: ${{ fromJson(needs.select-scope.outputs.scopes) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate branch name
+        id: branch
+        run: |
+          BRANCH_NAME="claude/aaw-quality-${{ matrix.scope }}-$(date +%Y%m%d)"
+          echo "name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
+      - name: AAW Code Quality Review
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-opus-4-5-20251101
+          timeout_minutes: 45
+          base_branch: main
+          branch_prefix: claude/aaw-quality-
+          track_progress: true
+          prompt: |
+            # AAW Weekly Code Quality Review
+
+            You are performing a scheduled code quality review for the AAW workspace.
+
+            ## Target Scope
+            **Review: `packages/${{ matrix.scope }}`**
+
+            ## Standards to Apply
+
+            1. Read `.claude/agents/code-simplifier.md` for code simplification guidelines
+            2. Read `.claude/skills/aaw-security/SKILL.md` for security rules
+            3. Read `packages/${{ matrix.scope }}/aaw.policy.yaml` for scope-specific policy
+
+            ## Your Tasks
+
+            1. **Analyze all source files**:
+               - List all .ts and .tsx files in `packages/${{ matrix.scope }}/`
+               - Exclude .test., .spec., .stories. files
+               - Read each file thoroughly
+
+            2. **Check for issues**:
+               - TypeScript strict mode violations
+               - Security vulnerabilities (OWASP Top 10)
+               - Code complexity issues
+               - Missing error handling
+               - Policy violations
+
+            3. **Apply AAW Standards**:
+               - Verify all async operations have proper error handling
+               - Check for hardcoded values that should be configurable
+               - Ensure logging is appropriate for auditing
+               - Validate input sanitization
+
+            4. **Make fixes**:
+               - Don't just report - FIX clear issues
+               - Use Edit tool to update files
+               - Ensure fixes don't break functionality
+
+            5. **Verify**:
+               - Run `npm run lint` if available
+               - Check for TypeScript errors
+
+            6. **Create PR if fixes made**:
+               - Branch from main
+               - Commit with: "fix(packages/${{ matrix.scope }}): code quality improvements"
+               - List all fixes in PR body
+
+            ## Guidelines
+            - Focus on this scope only
+            - Fix clear improvements
+            - Don't refactor working code unnecessarily
+            - If no issues, report and skip PR
+          claude_args: |
+            --max-turns 35
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(git:*),Bash(gh:*),Bash(npm run lint*),Bash(npm run typecheck*)"
+
+  report-completion:
+    needs: [select-scope, review-scope]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Summary
+        run: |
+          echo "## AAW Code Quality Review Complete" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Reviewed scopes:" >> $GITHUB_STEP_SUMMARY
+          echo '${{ needs.select-scope.outputs.scopes }}' | jq -r '.[]' | while read scope; do
+            echo "- \`packages/$scope\`" >> $GITHUB_STEP_SUMMARY
+          done
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Check for any PRs created by this workflow." >> $GITHUB_STEP_SUMMARY

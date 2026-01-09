@@ -1,0 +1,13 @@
+{
+  "$schema": "../../../schemas/security-profile.schema.json",
+  "name": "flask",
+  "extends": "languages/python",
+  "description": "Flask projects",
+
+  "permissions": {
+    "ask": [
+      "Bash(flask run:*)",
+      "Bash(gunicorn:*)"
+    ]
+  }
+}

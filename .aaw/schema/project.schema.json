@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "AAW Project Configuration",
+  "description": "Flexible project configuration for multi-role collaboration",
+  "type": "object",
+  "required": ["name", "roles"],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string",
+      "description": "Project name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Project description"
+    },
+    "roles": {
+      "type": "object",
+      "description": "Define roles and their workspaces",
+      "additionalProperties": {
+        "$ref": "#/$defs/role"
+      },
+      "minProperties": 1
+    },
+    "shared": {
+      "type": "object",
+      "description": "Shared resources configuration",
+      "properties": {
+        "contracts": {
+          "type": "string",
+          "description": "Path to API contracts"
+        },
+        "types": {
+          "type": "string",
+          "description": "Path to shared types"
+        },
+        "schemas": {
+          "type": "string",
+          "description": "Path to validation schemas"
+        }
+      }
+    },
+    "collaboration": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["strict", "flexible"],
+          "default": "strict",
+          "description": "strict = enforce boundaries, flexible = warn only"
+        },
+        "lockTimeout": {
+          "type": "integer",
+          "default": 300,
+          "description": "Lock timeout in seconds"
+        },
+        "requireAck": {
+          "type": "boolean",
+          "default": true,
+          "description": "Require acknowledgment for breaking changes"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "role": {
+      "type": "object",
+      "required": ["path"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name for the role"
+        },
+        "path": {
+          "type": "string",
+          "description": "Primary workspace path"
+        },
+        "framework": {
+          "type": "string",
+          "description": "Framework identifier (e.g., react, nestjs, fastapi)"
+        },
+        "canRead": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Additional paths this role can read"
+        },
+        "canWrite": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Additional paths this role can write"
+        },
+        "forbidden": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Paths this role cannot access"
+        },
+        "commands": {
+          "type": "object",
+          "description": "Role-specific commands",
+          "properties": {
+            "dev": { "type": "string" },
+            "build": { "type": "string" },
+            "test": { "type": "string" },
+            "lint": { "type": "string" }
+          }
+        }
+      }
+    }
+  }
+}

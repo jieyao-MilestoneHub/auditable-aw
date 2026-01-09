@@ -1,0 +1,81 @@
+{
+  "$schema": "../schema/project.schema.json",
+  "name": "two-person",
+  "description": "Simple two-role setup without integrator (frontend + backend)",
+
+  "init": {
+    "baseDir": "workspace",
+    "steps": [
+      {
+        "name": "Create workspace directory",
+        "command": "mkdir -p workspace",
+        "creates": "workspace"
+      },
+      {
+        "name": "Create frontend with Vite",
+        "command": "npm create vite@latest workspace/frontend -- --template react-ts",
+        "creates": "workspace/frontend"
+      },
+      {
+        "name": "Create backend",
+        "command": "mkdir -p workspace/backend/src && cd workspace/backend && npm init -y",
+        "creates": "workspace/backend"
+      },
+      {
+        "name": "Install backend dependencies",
+        "command": "cd workspace/backend && npm install express cors typescript @types/node @types/express tsx",
+        "creates": "workspace/backend/node_modules"
+      },
+      {
+        "name": "Create shared types",
+        "command": "mkdir -p workspace/shared/types workspace/shared/schemas",
+        "creates": "workspace/shared"
+      }
+    ]
+  },
+
+  "roles": {
+    "frontend": {
+      "name": "Frontend Developer",
+      "path": "workspace/frontend",
+      "framework": "react",
+      "canRead": ["workspace/shared/**", "workspace/backend/src/routes/**"],
+      "canWrite": ["workspace/frontend/**", "workspace/shared/types/**"],
+      "forbidden": ["workspace/backend/src/services/**", "workspace/backend/src/controllers/**"],
+      "commands": {
+        "dev": "cd workspace/frontend && npm run dev",
+        "build": "cd workspace/frontend && npm run build",
+        "test": "cd workspace/frontend && npm test"
+      }
+    },
+    "backend": {
+      "name": "Backend Developer",
+      "path": "workspace/backend",
+      "framework": "express",
+      "canRead": ["workspace/shared/**", "workspace/frontend/src/services/**"],
+      "canWrite": ["workspace/backend/**", "workspace/shared/types/**"],
+      "forbidden": ["workspace/frontend/src/components/**", "workspace/frontend/src/pages/**"],
+      "commands": {
+        "dev": "cd workspace/backend && npm run dev",
+        "build": "cd workspace/backend && npm run build",
+        "test": "cd workspace/backend && npm test"
+      }
+    }
+  },
+
+  "shared": {
+    "types": "workspace/shared/types",
+    "schemas": "workspace/shared/schemas"
+  },
+
+  "docs": {
+    "frontend": "https://vitejs.dev/guide/",
+    "backend": "https://expressjs.com/"
+  },
+
+  "collaboration": {
+    "mode": "flexible",
+    "lockTimeout": 300,
+    "requireAck": false
+  }
+}

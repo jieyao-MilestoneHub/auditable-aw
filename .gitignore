@@ -1,0 +1,77 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+build/
+*.tsbuildinfo
+
+# Environment files
+.env
+.env.*
+.env.local
+.env.production
+
+# Secrets
+secrets/
+*.pem
+*.key
+*.p12
+*.pfx
+credentials*
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# AAW specific
+.aaw/logs/*.jsonl
+.aaw/logs/sessions.json
+.aaw/evidence/*.zip
+.aaw/evidence/*.html
+.aaw/evidence/*.json
+.aaw/evidence/artifacts/
+.aaw/evidence/bundles/
+.aaw/evidence/test-reports/
+.aaw/requests/*/*.yaml
+.aaw/notifications/*/*.yaml
+.aaw/locks/*.lock
+.aaw/acks/*/*.yaml
+
+# Keep the directory structure
+!.aaw/logs/.gitkeep
+!.aaw/evidence/.gitkeep
+!.aaw/requests/.gitkeep
+!.aaw/notifications/.gitkeep
+!.aaw/locks/.gitkeep
+!.aaw/acks/.gitkeep
+
+# Workspace (user project - may want to commit or not)
+# workspace/node_modules/
+# workspace/**/node_modules/
+
+# Generated project config
+.aaw-project.json
+
+# Test coverage
+coverage/
+.nyc_output/
+
+# Temporary files
+*.tmp
+*.temp
+.cache/

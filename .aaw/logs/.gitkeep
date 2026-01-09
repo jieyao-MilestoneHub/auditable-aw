@@ -1,0 +1,3 @@
+# This directory stores AAW audit logs
+# Logs are in JSONL format
+# Do not commit actual log files to version control

@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "skill-rules.schema.json",
+  "title": "AAW Skill Rules Schema",
+  "description": "Schema for AAW skill evaluation rules configuration",
+  "type": "object",
+  "required": ["version", "config", "scoring", "skills"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "JSON Schema reference"
+    },
+    "version": {
+      "type": "string",
+      "description": "Schema version"
+    },
+    "config": {
+      "type": "object",
+      "required": ["minConfidenceScore", "showMatchReasons", "maxSkillsToShow"],
+      "properties": {
+        "minConfidenceScore": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Minimum score required to suggest a skill"
+        },
+        "showMatchReasons": {
+          "type": "boolean",
+          "description": "Whether to show why skills were matched"
+        },
+        "maxSkillsToShow": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10,
+          "description": "Maximum number of skills to suggest"
+        }
+      }
+    },
+    "scoring": {
+      "type": "object",
+      "required": ["keyword", "keywordPattern", "pathPattern", "directoryMatch", "intentPattern", "contentPattern", "contextPattern"],
+      "properties": {
+        "keyword": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Score for keyword match"
+        },
+        "keywordPattern": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Score for keyword pattern (regex) match"
+        },
+        "pathPattern": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Score for file path pattern match"
+        },
+        "directoryMatch": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Score for directory mapping match"
+        },
+        "intentPattern": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Score for intent pattern match"
+        },
+        "contentPattern": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Score for content pattern match"
+        },
+        "contextPattern": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Score for context pattern match"
+        }
+      }
+    },
+    "directoryMappings": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Map directories to default skills"
+    },
+    "skills": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["description", "priority", "triggers"],
+        "properties": {
+          "description": {
+            "type": "string",
+            "description": "Human-readable skill description"
+          },
+          "priority": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "description": "Skill priority (higher = more important)"
+          },
+          "triggers": {
+            "type": "object",
+            "properties": {
+              "keywords": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Simple keywords to match"
+              },
+              "keywordPatterns": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Regex patterns for keywords"
+              },
+              "pathPatterns": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Glob patterns for file paths"
+              },
+              "intentPatterns": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Regex patterns for user intent"
+              },
+              "contentPatterns": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Regex patterns for code content"
+              },
+              "contextPatterns": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Simple context keywords"
+              }
+            }
+          },
+          "excludePatterns": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Patterns that exclude this skill"
+          },
+          "relatedSkills": {
+            "type": "array",
+            "items": { "type": "string" },
+            "description": "Skills that are often used together"
+          }
+        }
+      }
+    }
+  }
+}

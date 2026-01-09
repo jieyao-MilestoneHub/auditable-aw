@@ -1,0 +1,10 @@
+{
+  "name": "dotnet-azure",
+  "description": ".NET enterprise (ASP.NET Core + Azure)",
+  "profiles": [
+    "base/security-core",
+    "languages/dotnet",
+    "frameworks/dotnet/aspnet-core",
+    "cloud/azure"
+  ]
+}

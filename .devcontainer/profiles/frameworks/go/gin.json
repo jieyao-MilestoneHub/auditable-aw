@@ -1,0 +1,6 @@
+{
+  "$schema": "../../../schemas/security-profile.schema.json",
+  "name": "gin",
+  "extends": "languages/go",
+  "description": "Gin framework projects"
+}

@@ -1,0 +1,70 @@
+{
+  "$schema": "../../schemas/security-profile.schema.json",
+  "version": "1.0.0",
+  "name": "security-core",
+  "description": "Core security rules - required for all projects",
+
+  "permissions": {
+    "disableBypassPermissionsMode": "disable",
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+      "Read(./**/credentials*)",
+      "Read(./**/*.pem)",
+      "Read(./**/*.key)",
+      "Read(./**/*.p12)",
+      "Read(./**/*.pfx)",
+      "Read(./**/id_rsa*)",
+      "Read(./**/.ssh/**)",
+      "Read(./**/vault*)",
+      "Read(./**/*secret*)",
+      "Read(./**/*password*)",
+      "Read(./**/token*)",
+      "Read(./**/.aws/**)",
+      "Read(./**/.azure/**)",
+      "Read(./**/.gcp/**)",
+      "Read(./**/service-account*.json)",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(rm -rf /)",
+      "Bash(rm -rf ~)",
+      "Bash(sudo:*)",
+      "Bash(chmod 777:*)",
+      "Bash(chmod +s:*)",
+      "Bash(chown root:*)",
+      "Bash(nc:*)",
+      "Bash(netcat:*)",
+      "Bash(ncat:*)",
+      "Bash(ssh:*)",
+      "Bash(scp:*)",
+      "Bash(rsync:*)",
+      "Bash(ftp:*)",
+      "Bash(eval:*)",
+      "Bash(exec:*)",
+      "Bash(base64 -d:*)",
+      "Bash(dd:*)",
+      "Bash(mkfs:*)",
+      "Bash(fdisk:*)",
+      "Bash(mount:*)"
+    ]
+  },
+
+  "allowManagedHooksOnly": true,
+  "strictKnownMarketplaces": true,
+
+  "allowedMcpServers": [
+    { "serverName": "aawctl" }
+  ],
+
+  "deniedMcpServers": [
+    { "serverUrl": "https://*.untrusted.com/*" },
+    { "serverUrl": "http://*" }
+  ],
+
+  "sandbox": {
+    "enabled": true,
+    "allowUnsandboxedCommands": false,
+    "autoAllowBashIfSandboxed": true
+  }
+}

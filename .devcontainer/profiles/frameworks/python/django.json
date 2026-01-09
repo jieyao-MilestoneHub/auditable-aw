@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../schemas/security-profile.schema.json",
+  "name": "django",
+  "extends": "languages/python",
+  "description": "Django projects",
+
+  "permissions": {
+    "deny": [
+      "Read(./**/settings_prod.py)",
+      "Read(./**/local_settings.py)",
+      "Bash(python manage.py shell:*)",
+      "Bash(python manage.py dbshell:*)",
+      "Bash(python manage.py dumpdata:*)"
+    ],
+    "ask": [
+      "Bash(python manage.py:*)"
+    ]
+  }
+}

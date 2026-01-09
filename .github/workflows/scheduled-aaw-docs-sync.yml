@@ -1,0 +1,130 @@
+name: Scheduled - AAW Documentation Sync
+
+on:
+  schedule:
+    # Run on the 1st of every month at 9 AM UTC
+    - cron: '0 9 1 * *'
+  workflow_dispatch:
+    inputs:
+      days_back:
+        description: 'Number of days to look back for changes'
+        required: false
+        default: '30'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  docs-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for code changes in period
+        id: check-changes
+        run: |
+          DAYS_BACK="${{ github.event.inputs.days_back || '30' }}"
+          SINCE_DATE=$(date -d "-${DAYS_BACK} days" +%Y-%m-%d)
+
+          echo "Checking for changes since: $SINCE_DATE"
+
+          # Get changed code files (excluding test files)
+          CHANGED_FILES=$(git log --since="$SINCE_DATE" --name-only --pretty=format: -- \
+            'packages/**/*.ts' 'packages/**/*.tsx' \
+            'tools/**/*.ts' \
+            ':!*.test.*' ':!*.spec.*' \
+            | sort -u | grep -v '^$' | head -100)
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "No code changes found in the last $DAYS_BACK days"
+          else
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "changed_files<<EOF" >> $GITHUB_OUTPUT
+            echo "$CHANGED_FILES" >> $GITHUB_OUTPUT
+            echo "EOF" >> $GITHUB_OUTPUT
+            echo "Found $(echo "$CHANGED_FILES" | wc -l) changed files"
+          fi
+
+          echo "since_date=$SINCE_DATE" >> $GITHUB_OUTPUT
+
+      - name: AAW Documentation Sync
+        if: steps.check-changes.outputs.has_changes == 'true'
+        uses: anthropics/claude-code-action@beta
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          model: claude-opus-4-5-20251101
+          timeout_minutes: 60
+          base_branch: main
+          branch_prefix: claude/aaw-docs-
+          track_progress: true
+          prompt: |
+            # AAW Monthly Documentation Sync
+
+            You are running a scheduled documentation sync for the AAW workspace.
+
+            ## Changed Files Since ${{ steps.check-changes.outputs.since_date }}
+
+            ```
+            ${{ steps.check-changes.outputs.changed_files }}
+            ```
+
+            ## Your Tasks
+
+            1. **Analyze Changes**:
+               - Review each changed file
+               - Understand what functionality was added, modified, or removed
+
+            2. **Find Related Documentation**:
+               - `README.md` (root)
+               - `CLAUDE.md` (project memory)
+               - `packages/*/CLAUDE.md` (package-specific)
+               - `tools/aawctl/README.md`
+               - `.claude/commands/*.md`
+               - `.claude/skills/*/SKILL.md`
+
+            3. **Check for Documentation Issues**:
+               - Are command examples still correct?
+               - Are tool descriptions accurate?
+               - Are policy examples up to date?
+               - Are workflow instructions correct?
+
+            4. **Fix What's Wrong**:
+               - Update incorrect examples
+               - Fix outdated command references
+               - Update changed API signatures
+               - Add docs for new features that have none
+
+            5. **Create PR if changes made**:
+               - Branch from main
+               - Commit documentation updates
+               - PR title: "docs: sync documentation with code changes"
+
+            ## AAW-Specific Checks
+
+            - Verify `/aaw-*` command documentation matches implementation
+            - Check `aawctl` tool descriptions are accurate
+            - Ensure policy examples reflect current `aaw.policy.yaml`
+            - Validate skill descriptions match behavior
+
+            ## Guidelines
+            - Only fix things that are actually WRONG
+            - Don't add changelog-style entries
+            - If no problems found, report and don't create PR
+          claude_args: |
+            --max-turns 30
+            --allowedTools "Read,Write,Edit,Glob,Grep,Bash(git:*),Bash(gh:*)"
+
+      - name: Report no changes
+        if: steps.check-changes.outputs.has_changes == 'false'
+        run: |
+          echo "No code changes found in the last ${{ github.event.inputs.days_back || '30' }} days."
+          echo "Skipping documentation sync."

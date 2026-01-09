@@ -1,0 +1,16 @@
+{
+  "$schema": "../../../schemas/security-profile.schema.json",
+  "name": "quarkus",
+  "extends": "languages/java",
+  "description": "Quarkus projects",
+
+  "permissions": {
+    "deny": [
+      "Read(./**/application-prod*.properties)"
+    ],
+    "ask": [
+      "Bash(./mvnw quarkus:dev:*)",
+      "Bash(./gradlew quarkusDev:*)"
+    ]
+  }
+}

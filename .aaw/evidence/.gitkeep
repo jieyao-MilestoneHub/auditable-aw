@@ -1,0 +1,7 @@
+# This directory stores AAW evidence bundles
+# Evidence bundles contain:
+# - index.html (human-readable report)
+# - session.json (raw session data)
+# - artifacts/ (captured files)
+# - logs/ (audit logs)
+# Do not commit actual evidence files to version control

@@ -1,0 +1,241 @@
+# AAW Global Policy Configuration
+# This file defines the default security and audit policies for the entire workspace.
+# Package-specific policies can extend this (more restrictive only).
+
+version: "1.0"
+name: "AAW Global Policy"
+description: "Enterprise-grade security and audit policy for AI-assisted development"
+
+# Policy enforcement mode
+# - "audit-only": Log violations but don't block (for initial rollout)
+# - "enforce": Block policy violations
+mode: "audit-only"
+
+# Bash command rules
+bash:
+  # Commands that are always allowed
+  allow:
+    - "npm run *"
+    - "npm test *"
+    - "npm install"
+    - "npm ci"
+    - "yarn *"
+    - "pnpm *"
+    - "node *"
+    - "npx *"
+    - "git status"
+    - "git diff *"
+    - "git log *"
+    - "git branch *"
+    - "git checkout *"
+    - "git add *"
+    - "git commit *"
+    - "git push *"
+    - "git pull *"
+    - "git fetch *"
+    - "ls *"
+    - "cat *"
+    - "echo *"
+    - "pwd"
+    - "which *"
+    - "tsc *"
+    - "eslint *"
+    - "prettier *"
+    - "jest *"
+    - "vitest *"
+
+  # Commands that require explicit approval
+  ask:
+    - "npm publish *"
+    - "git push --force *"
+    - "docker *"
+
+  # Commands that are always denied
+  deny:
+    - "rm -rf /"
+    - "rm -rf /*"
+    - "sudo *"
+    - "chmod 777 *"
+    - "curl *"
+    - "wget *"
+    - "nc *"
+    - "netcat *"
+    - "telnet *"
+    - "> /dev/*"
+    - "dd *"
+    - "mkfs *"
+    - "fdisk *"
+    - "passwd *"
+    - "useradd *"
+    - "userdel *"
+
+# File access rules
+files:
+  # Files/patterns that cannot be read
+  read_deny:
+    - ".env"
+    - ".env.*"
+    - ".env.local"
+    - ".env.production"
+    - "secrets/**"
+    - "**/secrets/**"
+    - "**/credentials*"
+    - "**/*.pem"
+    - "**/*.key"
+    - "**/*.p12"
+    - "**/*.pfx"
+    - "**/id_rsa*"
+    - "**/id_ed25519*"
+    - "**/.ssh/*"
+    - "**/aws_credentials"
+    - "**/.aws/credentials"
+    - "**/gcp-credentials.json"
+    - "**/.npmrc"
+    - "**/.pypirc"
+
+  # Files/patterns that cannot be written
+  write_deny:
+    - "node_modules/**"
+    - ".git/**"
+    - "dist/**"
+    - "build/**"
+    - ".aaw/logs/**"
+
+# Package installation rules
+packages:
+  # Whether to require approval for unknown packages
+  require_approval: true
+
+  # Approved package prefixes
+  approved_prefixes:
+    - "@types/"
+    - "@anthropic/"
+    - "@modelcontextprotocol/"
+    - "@testing-library/"
+    - "@typescript-eslint/"
+
+  # Approved specific packages
+  approved:
+    - "typescript"
+    - "jest"
+    - "vitest"
+    - "eslint"
+    - "prettier"
+    - "react"
+    - "react-dom"
+    - "next"
+    - "express"
+    - "fastify"
+    - "zod"
+    - "yaml"
+    - "glob"
+    - "archiver"
+
+  # Denied packages (known vulnerabilities or malicious)
+  denied:
+    - "event-stream"  # Known supply chain attack
+    - "flatmap-stream"  # Malicious
+
+# External connection rules
+network:
+  # Allowed domains for external connections
+  allowed_domains:
+    - "registry.npmjs.org"
+    - "github.com"
+    - "api.github.com"
+
+  # Denied domains
+  denied_domains:
+    - "*"  # Default deny all others
+
+# Audit settings
+audit:
+  # What to include in logs
+  log_level: "verbose"
+
+  # Include in evidence bundle
+  include:
+    - "commands"
+    - "policy_checks"
+    - "file_diffs"
+    - "test_results"
+    - "artifacts"
+
+  # Retention period (days)
+  retention_days: 90
+
+# Scope hierarchy
+scopes:
+  # Define package scopes
+  packages:
+    frontend:
+      path: "packages/frontend"
+      extends: "global"
+    backend:
+      path: "packages/backend"
+      extends: "global"
+    shared:
+      path: "packages/shared"
+      extends: "global"
+    integrator:
+      path: "packages/integrator"
+      extends: "global"
+
+# Role definitions for multi-terminal collaboration
+roles:
+  frontend:
+    description: "Frontend developer - UI components and user experience"
+    scope: "frontend"
+    allowed_paths:
+      - "packages/frontend/**"
+      - "packages/shared/src/types/**"
+    readonly_paths:
+      - "packages/integrator/src/contracts/**"
+    forbidden_paths:
+      - "packages/backend/src/services/**"
+      - "packages/backend/src/controllers/**"
+
+  backend:
+    description: "Backend developer - API and business logic"
+    scope: "backend"
+    allowed_paths:
+      - "packages/backend/**"
+      - "packages/shared/src/types/**"
+    readonly_paths:
+      - "packages/integrator/src/contracts/**"
+    forbidden_paths:
+      - "packages/frontend/src/components/**"
+      - "packages/frontend/src/pages/**"
+
+  integrator:
+    description: "Integration developer - API contracts and coordination"
+    scope: "integrator"
+    allowed_paths:
+      - "packages/integrator/**"
+      - "packages/shared/**"
+    readonly_paths:
+      - "packages/frontend/src/services/**"
+      - "packages/backend/src/routes/**"
+    forbidden_paths:
+      - "packages/frontend/src/components/**"
+      - "packages/backend/src/services/**"
+
+# Collaboration protocol
+collaboration:
+  # Lock file for coordinating writes
+  lock_file: ".aaw/locks/edit.lock"
+
+  # Contract sync mechanism
+  contract_sync:
+    source: "packages/integrator/src/contracts"
+    targets:
+      - "packages/shared/src/types"
+
+  # Notification channels (logged to .aaw/notifications/)
+  notifications:
+    breaking_change:
+      notify_roles: ["frontend", "backend"]
+      require_ack: true
+    contract_update:
+      notify_roles: ["frontend", "backend"]
+      require_ack: false

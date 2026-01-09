@@ -1,0 +1,6 @@
+{
+  "$schema": "../../../schemas/security-profile.schema.json",
+  "name": "blazor",
+  "extends": "languages/dotnet",
+  "description": "Blazor projects"
+}

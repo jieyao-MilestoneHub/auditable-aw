@@ -1,0 +1,104 @@
+{
+  "$schema": "../schema/project.schema.json",
+  "name": "fullstack-python",
+  "description": "React frontend + FastAPI backend (uses official patterns)",
+
+  "init": {
+    "baseDir": "workspace",
+    "steps": [
+      {
+        "name": "Create workspace directory",
+        "command": "mkdir -p workspace",
+        "creates": "workspace"
+      },
+      {
+        "name": "Create frontend with Vite",
+        "command": "npm create vite@latest workspace/frontend -- --template react-ts",
+        "creates": "workspace/frontend"
+      },
+      {
+        "name": "Create backend with FastAPI structure",
+        "command": "mkdir -p workspace/backend/app/routers workspace/backend/app/services workspace/backend/app/models workspace/backend/tests",
+        "creates": "workspace/backend"
+      },
+      {
+        "name": "Create Python virtual environment",
+        "command": "cd workspace/backend && python -m venv venv",
+        "creates": "workspace/backend/venv"
+      },
+      {
+        "name": "Install Python dependencies",
+        "command": "cd workspace/backend && venv/bin/pip install fastapi uvicorn[standard] pydantic sqlalchemy alembic pytest httpx",
+        "creates": "workspace/backend/venv/lib"
+      },
+      {
+        "name": "Create backend main.py",
+        "command": "echo 'from fastapi import FastAPI\\napp = FastAPI()' > workspace/backend/app/main.py",
+        "creates": "workspace/backend/app/main.py"
+      },
+      {
+        "name": "Create shared directory",
+        "command": "mkdir -p workspace/shared/types workspace/contracts",
+        "creates": "workspace/shared"
+      }
+    ]
+  },
+
+  "roles": {
+    "frontend": {
+      "name": "Frontend Developer",
+      "path": "workspace/frontend",
+      "framework": "react",
+      "canRead": ["workspace/shared/**", "workspace/contracts/**"],
+      "canWrite": ["workspace/frontend/**"],
+      "forbidden": ["workspace/backend/app/services/**", "workspace/backend/app/routers/**"],
+      "commands": {
+        "dev": "cd workspace/frontend && npm run dev",
+        "build": "cd workspace/frontend && npm run build",
+        "test": "cd workspace/frontend && npm test"
+      }
+    },
+    "backend": {
+      "name": "Backend Developer",
+      "path": "workspace/backend",
+      "framework": "fastapi",
+      "canRead": ["workspace/shared/**", "workspace/contracts/**"],
+      "canWrite": ["workspace/backend/**"],
+      "forbidden": ["workspace/frontend/src/components/**", "workspace/frontend/src/pages/**"],
+      "commands": {
+        "dev": "cd workspace/backend && venv/bin/uvicorn app.main:app --reload",
+        "test": "cd workspace/backend && venv/bin/pytest",
+        "lint": "cd workspace/backend && venv/bin/ruff check app"
+      }
+    },
+    "integrator": {
+      "name": "API Integrator",
+      "path": "workspace/contracts",
+      "canRead": ["workspace/frontend/src/**", "workspace/backend/app/**", "workspace/shared/**"],
+      "canWrite": ["workspace/contracts/**", "workspace/shared/**"],
+      "forbidden": ["workspace/frontend/src/components/**", "workspace/backend/app/services/**"],
+      "commands": {
+        "generate": "cd workspace/backend && venv/bin/python -c \"from app.main import app; import json; print(json.dumps(app.openapi()))\" > ../contracts/openapi.json",
+        "test": "cd workspace/backend && venv/bin/pytest tests/integration/"
+      }
+    }
+  },
+
+  "shared": {
+    "contracts": "workspace/contracts",
+    "types": "workspace/shared/types",
+    "schemas": "workspace/contracts/openapi.json"
+  },
+
+  "docs": {
+    "frontend": "https://vitejs.dev/guide/",
+    "backend": "https://fastapi.tiangolo.com/",
+    "pydantic": "https://docs.pydantic.dev/"
+  },
+
+  "collaboration": {
+    "mode": "strict",
+    "lockTimeout": 300,
+    "requireAck": true
+  }
+}

@@ -1,0 +1,67 @@
+{
+  "$schema": "../schema/project.schema.json",
+  "name": "microservices",
+  "description": "Microservices architecture with multiple backend services",
+
+  "roles": {
+    "gateway": {
+      "name": "API Gateway Developer",
+      "path": "services/gateway",
+      "framework": "fastify",
+      "canRead": ["contracts/**", "shared/**", "services/*/openapi.yaml"],
+      "canWrite": ["services/gateway/**"],
+      "forbidden": ["services/user/**", "services/order/**", "services/payment/**"],
+      "commands": {
+        "dev": "npm run dev --workspace=gateway",
+        "test": "npm run test --workspace=gateway"
+      }
+    },
+    "user-service": {
+      "name": "User Service Developer",
+      "path": "services/user",
+      "framework": "nestjs",
+      "canRead": ["contracts/**", "shared/**"],
+      "canWrite": ["services/user/**"],
+      "forbidden": ["services/gateway/**", "services/order/**", "services/payment/**"],
+      "commands": {
+        "dev": "npm run dev --workspace=user-service",
+        "test": "npm run test --workspace=user-service"
+      }
+    },
+    "order-service": {
+      "name": "Order Service Developer",
+      "path": "services/order",
+      "framework": "nestjs",
+      "canRead": ["contracts/**", "shared/**"],
+      "canWrite": ["services/order/**"],
+      "forbidden": ["services/gateway/**", "services/user/**", "services/payment/**"],
+      "commands": {
+        "dev": "npm run dev --workspace=order-service",
+        "test": "npm run test --workspace=order-service"
+      }
+    },
+    "integrator": {
+      "name": "Service Integrator",
+      "path": "contracts",
+      "canRead": ["services/**"],
+      "canWrite": ["contracts/**", "shared/**"],
+      "forbidden": [],
+      "commands": {
+        "validate": "npm run contract:validate",
+        "test": "npm run test:integration"
+      }
+    }
+  },
+
+  "shared": {
+    "contracts": "contracts",
+    "types": "shared/types",
+    "schemas": "shared/schemas"
+  },
+
+  "collaboration": {
+    "mode": "strict",
+    "lockTimeout": 300,
+    "requireAck": true
+  }
+}

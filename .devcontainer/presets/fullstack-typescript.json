@@ -1,0 +1,10 @@
+{
+  "name": "fullstack-typescript",
+  "description": "TypeScript fullstack (React + NestJS)",
+  "profiles": [
+    "base/security-core",
+    "languages/typescript",
+    "frameworks/typescript/react",
+    "frameworks/typescript/nestjs"
+  ]
+}

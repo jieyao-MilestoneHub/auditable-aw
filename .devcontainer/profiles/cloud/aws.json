@@ -1,0 +1,28 @@
+{
+  "$schema": "../../schemas/security-profile.schema.json",
+  "name": "aws",
+  "description": "AWS environment",
+
+  "permissions": {
+    "deny": [
+      "Read(./**/.aws/credentials)",
+      "Read(./**/.aws/config)",
+      "Read(./**/aws-exports.js)",
+      "Bash(aws iam:*)",
+      "Bash(aws sts assume-role:*)",
+      "Bash(aws secretsmanager get-secret-value:*)",
+      "Bash(aws ssm get-parameter --with-decryption:*)",
+      "Bash(aws s3 rb:*)",
+      "Bash(aws ec2 terminate:*)",
+      "Bash(aws rds delete:*)",
+      "Bash(aws lambda delete:*)"
+    ],
+    "ask": [
+      "Bash(aws s3:*)",
+      "Bash(aws cloudformation:*)",
+      "Bash(aws cdk:*)",
+      "Bash(sam:*)",
+      "Bash(serverless:*)"
+    ]
+  }
+}

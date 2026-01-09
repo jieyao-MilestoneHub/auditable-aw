@@ -1,0 +1,19 @@
+{
+  "$schema": "../../../schemas/security-profile.schema.json",
+  "name": "react",
+  "extends": "languages/typescript",
+  "description": "React projects",
+
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [{
+          "type": "command",
+          "command": "if [[ \"$CLAUDE_TOOL_INPUT_FILE_PATH\" =~ \\.(tsx|jsx)$ ]]; then npx eslint --fix \"$CLAUDE_TOOL_INPUT_FILE_PATH\" 2>/dev/null || true; fi",
+          "timeout": 30
+        }]
+      }
+    ]
+  }
+}

@@ -1,0 +1,182 @@
+{
+  "$schema": "./skill-rules.schema.json",
+  "version": "1.0",
+  "config": {
+    "minConfidenceScore": 3,
+    "showMatchReasons": true,
+    "maxSkillsToShow": 4
+  },
+  "scoring": {
+    "keyword": 2,
+    "keywordPattern": 3,
+    "pathPattern": 4,
+    "directoryMatch": 5,
+    "intentPattern": 4,
+    "contentPattern": 3,
+    "contextPattern": 2
+  },
+  "directoryMappings": {
+    "packages/frontend": "aaw-sop",
+    "packages/backend": "aaw-sop",
+    "packages/shared": "aaw-sop",
+    "tools/aawctl": "aaw-sop",
+    ".claude/commands": "aaw-sop",
+    ".claude/skills": "aaw-sop",
+    ".github/workflows": "github-actions",
+    ".devcontainer": "devcontainer-config"
+  },
+  "skills": {
+    "aaw-sop": {
+      "description": "AAW Standard Operating Procedure - plan -> implement -> test -> evidence workflow",
+      "priority": 10,
+      "triggers": {
+        "keywords": ["plan", "implement", "test", "evidence", "audit", "aaw", "workflow", "ticket", "feature", "change"],
+        "keywordPatterns": ["\\bplan\\b", "\\bimplement\\b", "\\bauditable\\b", "\\baaw\\b", "/aaw-"],
+        "pathPatterns": ["packages/**/*.ts", "packages/**/*.tsx", "tools/**/*.ts"],
+        "intentPatterns": [
+          "(?:create|add|build|implement|develop).*(?:feature|function|component)",
+          "(?:start|begin).*(?:task|work|implementation)",
+          "(?:need to|want to|going to).*(?:change|modify|update|add)"
+        ],
+        "contextPatterns": ["auditable", "compliance", "governance", "evidence"]
+      },
+      "relatedSkills": ["aaw-security"]
+    },
+    "aaw-security": {
+      "description": "AAW Security Rules - sensitive file protection, dangerous command prevention",
+      "priority": 10,
+      "triggers": {
+        "keywords": ["security", "secret", "credential", "password", "token", "api key", ".env", "pem", "key file", "sudo", "rm -rf"],
+        "keywordPatterns": ["\\bsecret\\b", "\\bcredential\\b", "\\bpassword\\b", "\\.env\\b", "\\.pem\\b", "\\.key\\b"],
+        "pathPatterns": ["**/.env", "**/.env.*", "**/secrets/**", "**/credentials/**", "**/*.pem", "**/*.key"],
+        "intentPatterns": [
+          "(?:read|access|get).*(?:secret|credential|password|token)",
+          "(?:run|execute).*(?:sudo|admin|root)",
+          "(?:delete|remove).*(?:all|everything|force)"
+        ],
+        "contentPatterns": ["process\\.env", "API_KEY", "SECRET", "PASSWORD", "TOKEN"]
+      },
+      "relatedSkills": ["aaw-sop"]
+    },
+    "systematic-debugging": {
+      "description": "Four-phase debugging with root cause analysis",
+      "priority": 9,
+      "triggers": {
+        "keywords": ["bug", "debug", "fix", "error", "issue", "broken", "crash", "failing", "not working"],
+        "keywordPatterns": ["\\bbug\\b", "\\bfix\\b", "\\berror\\b", "\\bissue\\b", "doesn't work"],
+        "intentPatterns": [
+          "(?:fix|debug|resolve|investigate).*(?:bug|error|issue|problem)",
+          "(?:why).*(?:not working|broken|failing|crash)",
+          "(?:something).*(?:wrong|broken)"
+        ]
+      },
+      "excludePatterns": ["fix typo", "fix formatting", "fix lint"],
+      "relatedSkills": ["aaw-sop"]
+    },
+    "testing-patterns": {
+      "description": "Jest/Vitest testing patterns and TDD workflow",
+      "priority": 8,
+      "triggers": {
+        "keywords": ["test", "jest", "vitest", "spec", "tdd", "mock", "factory", "coverage"],
+        "keywordPatterns": ["\\btest(?:s|ing)?\\b", "\\bspec\\b", "unit test"],
+        "pathPatterns": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/test-utils/**", "**/__mocks__/**"],
+        "intentPatterns": [
+          "(?:write|add|create|fix).*(?:test|spec)",
+          "(?:test|spec).*(?:for|of|the)",
+          "(?:run).*(?:test|coverage)"
+        ],
+        "contentPatterns": ["describe\\(", "it\\(", "expect\\(", "jest\\.mock", "vi\\.mock"]
+      },
+      "excludePatterns": ["e2e", "integration test"],
+      "relatedSkills": ["aaw-sop"]
+    },
+    "typescript-conventions": {
+      "description": "TypeScript strict mode and type safety",
+      "priority": 7,
+      "triggers": {
+        "keywords": ["typescript", "type", "interface", "generic", "strict mode", "any", "unknown"],
+        "keywordPatterns": ["\\btype\\b", "\\binterface\\b", "\\bgeneric\\b", "type error"],
+        "pathPatterns": ["**/*.d.ts", "**/types/**", "**/types.ts"],
+        "intentPatterns": [
+          "(?:define|create).*(?:type|interface)",
+          "(?:type).*(?:error|issue)",
+          "(?:fix).*(?:type|typescript)"
+        ],
+        "contentPatterns": ["interface ", "type ", ": unknown", "as const"]
+      },
+      "excludePatterns": ["issue type", "type of bug"]
+    },
+    "code-review": {
+      "description": "Code review and PR feedback handling",
+      "priority": 7,
+      "triggers": {
+        "keywords": ["code review", "pr", "pull request", "review", "feedback", "comment"],
+        "keywordPatterns": ["code.review", "pr.feedback", "review.comment", "pull.request"],
+        "intentPatterns": [
+          "(?:review|check).*(?:code|changes|pr)",
+          "(?:respond|address).*(?:review|feedback|comment)"
+        ],
+        "contextPatterns": ["reviewer", "approval", "merge"]
+      },
+      "relatedSkills": ["aaw-security"]
+    },
+    "github-actions": {
+      "description": "GitHub Actions CI/CD workflow patterns",
+      "priority": 6,
+      "triggers": {
+        "keywords": ["github action", "workflow", "ci/cd", "cicd", "pipeline", "ci", "cd"],
+        "keywordPatterns": ["github.action", "ci/?cd", "\\bworkflow\\b"],
+        "pathPatterns": [".github/workflows/**", ".github/**/*.yml", ".github/**/*.yaml"],
+        "intentPatterns": [
+          "(?:create|add|update).*(?:workflow|action|pipeline)",
+          "(?:ci|cd).*(?:pipeline|workflow)"
+        ],
+        "contentPatterns": ["runs-on:", "uses:", "steps:"]
+      }
+    },
+    "devcontainer-config": {
+      "description": "DevContainer and Docker configuration",
+      "priority": 5,
+      "triggers": {
+        "keywords": ["devcontainer", "docker", "dockerfile", "container", "bootstrap"],
+        "keywordPatterns": ["\\bcontainer\\b", "\\bdocker\\b", "devcontainer"],
+        "pathPatterns": [".devcontainer/**", "**/Dockerfile", "**/docker-compose.yml"],
+        "intentPatterns": [
+          "(?:configure|setup).*(?:container|docker|devcontainer)",
+          "(?:add|modify).*(?:container|docker)"
+        ],
+        "contentPatterns": ["FROM ", "WORKDIR", "devcontainer.json"]
+      }
+    },
+    "mcp-tools": {
+      "description": "MCP server and tool development",
+      "priority": 6,
+      "triggers": {
+        "keywords": ["mcp", "tool", "aawctl", "server", "stdio"],
+        "keywordPatterns": ["\\bmcp\\b", "\\baawctl\\b", "mcp.server"],
+        "pathPatterns": ["tools/aawctl/**", ".mcp.json", "**/managed-mcp.json"],
+        "intentPatterns": [
+          "(?:create|add).*(?:tool|mcp)",
+          "(?:call|use).*(?:aawctl|mcp)"
+        ],
+        "contentPatterns": ["@modelcontextprotocol", "McpServer", "stdio"]
+      },
+      "relatedSkills": ["aaw-sop"]
+    },
+    "policy-config": {
+      "description": "AAW policy configuration and management",
+      "priority": 6,
+      "triggers": {
+        "keywords": ["policy", "permission", "allow", "deny", "restrict", "governance"],
+        "keywordPatterns": ["\\bpolicy\\b", "\\bpermission\\b", "aaw\\.policy"],
+        "pathPatterns": ["**/aaw.policy.yaml", "**/managed-settings.json"],
+        "intentPatterns": [
+          "(?:configure|set|update).*(?:policy|permission)",
+          "(?:allow|deny|restrict).*(?:command|file|action)"
+        ],
+        "contentPatterns": ["bash_allow:", "bash_deny:", "file_read_deny:"]
+      },
+      "relatedSkills": ["aaw-security"]
+    }
+  }
+}

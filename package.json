@@ -1,0 +1,26 @@
+{
+  "name": "aaw-workspace",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Auditable AI Workspace - Enterprise-grade auditable development with Claude Code",
+  "workspaces": [
+    ".aaw/tools/aawctl/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces",
+    "build:aawctl": "npm run build -w @aaw/aawctl-server",
+    "dev": "npm run dev --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "clean": "npm run clean --workspaces --if-present && rm -rf node_modules",
+    "prepare": "npm run build:aawctl"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  }
+}

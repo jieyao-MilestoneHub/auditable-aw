@@ -1,0 +1,16 @@
+{
+  "$schema": "../../../schemas/security-profile.schema.json",
+  "name": "nextjs",
+  "extends": "languages/typescript",
+  "description": "Next.js projects",
+
+  "permissions": {
+    "deny": [
+      "Read(./**/.next/cache/**)"
+    ],
+    "ask": [
+      "Bash(next build:*)",
+      "Bash(next dev:*)"
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "aaw-profile-composer",
+  "version": "1.0.0",
+  "description": "AAW governance profile merger",
+  "main": "compose-settings.js",
+  "bin": {
+    "compose-settings": "./compose-settings.js"
+  },
+  "scripts": {
+    "compose": "node compose-settings.js",
+    "test": "node --test test.js"
+  },
+  "keywords": ["aaw", "governance", "profiles"],
+  "license": "UNLICENSED"
+}
