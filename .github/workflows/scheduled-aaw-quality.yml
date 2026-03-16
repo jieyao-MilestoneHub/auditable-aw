@@ -21,6 +21,7 @@ permissions:
 
 jobs:
   select-scope:
+    if: false
     runs-on: ubuntu-latest
     outputs:
       scopes: ${{ steps.select.outputs.scopes }}
